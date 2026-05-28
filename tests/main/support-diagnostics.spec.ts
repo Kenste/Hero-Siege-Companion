@@ -53,8 +53,9 @@ describe("support diagnostics metadata", () => {
     const userDataPath = path.join(tempDir, "userData");
     const bundlePath = path.join(tempDir, "diagnostics.zip");
     const profileLogPath = `C:\\Users\\${os.userInfo().username}\\AppData\\Roaming\\Hero Siege Companion\\app-debug.log`;
+    const linuxLogPath = path.join(os.homedir(), ".config", "Hero Siege Companion", "app-debug.log");
     fs.mkdirSync(userDataPath);
-    fs.writeFileSync(path.join(userDataPath, "app-debug.log"), `appLogPath=${profileLogPath}\n`, "utf8");
+    fs.writeFileSync(path.join(userDataPath, "app-debug.log"), `appLogPath=${profileLogPath}\nlinuxLogPath=${linuxLogPath}\n`, "utf8");
     fs.writeFileSync(path.join(userDataPath, "preferences.json"), "{\"private\":true}\n", "utf8");
     fs.writeFileSync(
       path.join(userDataPath, "capture-wide-debug.log"),
@@ -78,9 +79,12 @@ describe("support diagnostics metadata", () => {
       filePath: bundlePath,
       includedFiles: ["diagnostics-summary.txt", "app-debug.log", "capture-wide-debug.log"],
     });
-    expect(entries["diagnostics-summary.txt"]).toContain("%USERPROFILE%");
+    if (process.platform === "win32") {
+      expect(entries["diagnostics-summary.txt"]).toContain("%USERPROFILE%");
+    }
     expect(entries["diagnostics-summary.txt"]).not.toContain(os.userInfo().username);
     expect(entries["app-debug.log"]).toContain("%USERPROFILE%\\AppData");
+    expect(entries["app-debug.log"]).toContain("$HOME");
     expect(entries["app-debug.log"]).not.toContain(os.userInfo().username);
     expect(entries["capture-wide-debug.log"]).not.toContain("payloadBase64");
     expect(entries["capture-wide-debug.log"]).not.toContain("raw-packet");

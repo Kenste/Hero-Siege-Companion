@@ -1,5 +1,6 @@
 import type { BrowserWindow } from "electron";
 import fs from "node:fs";
+import os from "node:os";
 import path from "node:path";
 import { showSaveDialogWithParent } from "./electron-dialogs";
 import { createZipArchive, type ZipArchiveEntry } from "./zip-archive";
@@ -179,9 +180,16 @@ function createSupportDiagnosticsSummary(diagnosticsSummary: string, info: Suppo
 }
 
 function redactUserProfilePath(value: string): string {
-  return value.replace(/[A-Z]:[\\/]+Users[\\/]+[^\\/\r\n"]+/gi, "%USERPROFILE%");
+  const homePath = os.homedir();
+  const withoutWindowsProfile = value.replace(/[A-Z]:[\\/]+Users[\\/]+[^\\/\r\n"]+/gi, "%USERPROFILE%");
+  if (!homePath) return withoutWindowsProfile;
+  return withoutWindowsProfile.replace(new RegExp(escapeRegExp(homePath), "g"), "$HOME");
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return Boolean(value) && typeof value === "object" && !Array.isArray(value);
+}
+
+function escapeRegExp(value: string): string {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
