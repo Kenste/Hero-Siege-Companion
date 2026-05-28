@@ -142,6 +142,22 @@ Run the app:
 npm start
 ```
 
+### Linux Packet Capture
+
+On Linux, install `tcpdump` and grant it packet capture capability:
+
+```bash
+sudo setcap cap_net_raw,cap_net_admin=eip /usr/bin/tcpdump
+```
+
+Then run the app normally:
+
+```bash
+npm start
+```
+
+Npcap is only required on Windows.
+
 Run tests:
 
 ```powershell

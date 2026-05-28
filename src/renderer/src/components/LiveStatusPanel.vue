@@ -15,7 +15,9 @@ defineEmits<{
 
 const showCaptureDetails = defineModel<boolean>("showCaptureDetails", { required: true });
 const npcapServiceStatus = computed(() => props.state.health.npcapService.trim().toLowerCase());
-const npcapServiceRunning = computed(() => npcapServiceStatus.value === "running");
+const npcapServiceRunning = computed(
+  () => npcapServiceStatus.value === "running" || npcapServiceStatus.value.startsWith("not required"),
+);
 const showNpcapSetupChecklist = computed(() => !npcapServiceRunning.value || props.state.health.adminOnly || !props.state.health.winPcapCompatible);
 </script>
 

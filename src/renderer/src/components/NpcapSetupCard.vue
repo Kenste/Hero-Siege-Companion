@@ -11,7 +11,9 @@ defineEmits<{
 }>();
 
 const npcapServiceStatus = computed(() => props.health.npcapService.trim().toLowerCase());
-const npcapServiceRunning = computed(() => npcapServiceStatus.value === "running");
+const npcapServiceRunning = computed(
+  () => npcapServiceStatus.value === "running" || npcapServiceStatus.value.startsWith("not required"),
+);
 </script>
 
 <template>
