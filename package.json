@@ -56,7 +56,7 @@
       "artifactName": "Hero Siege Companion.exe"
     }
   },
-  "dependencies": {
+  "optionalDependencies": {
     "cap": "^0.2.1"
   },
   "devDependencies": {
