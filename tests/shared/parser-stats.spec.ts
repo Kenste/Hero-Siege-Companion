@@ -901,6 +901,78 @@ test("known item rarities override superior packet rarity", () => {
   assert.equal(snapshot.items.Satanic.total, 1);
 });
 
+test("known non-server-announced item identities survive heroic-coded live pickup packets", () => {
+  const events = messageToEvents([
+    {
+      status: 1,
+      message: "Success on inventory update ext",
+      operations: {
+        add: {
+          "1-54605101-live-satanic-27-0": {
+            e: 10,
+            a: 501656744,
+            j: 0,
+            b: 27,
+            d: 9,
+            c: 1,
+            sh: "live-satanic",
+          },
+          "1-54605101-live-set-38-0": {
+            e: 10,
+            a: 359221549,
+            j: 0,
+            b: 38,
+            d: 9,
+            c: 1,
+            sh: "live-set",
+          },
+        },
+      },
+    },
+  ]);
+  const stats = new StatsEngine();
+  const snapshot = stats.applyEvents(events);
+
+  assert.equal(events[0].value.label, "Ancient Avenger");
+  assert.equal(events[0].value.rarityName, "Satanic");
+  assert.equal(events[1].value.label, "Valkyrie's Winged Helm");
+  assert.equal(events[1].value.rarityName, "Set");
+  assert.equal(snapshot.items.Satanic.total, 1);
+  assert.equal(snapshot.items.Set.total, 1);
+  assert.equal(snapshot.items.Heroic.total, 0);
+});
+
+test("stack item identities survive heroic-coded live pickup packets", () => {
+  const events = messageToEvents([
+    {
+      status: 1,
+      message: "ok",
+      operations: {
+        stack: {
+          "1-54605101-live-socket-37-15": {
+            amount: 1,
+            pickup_add_data: {
+              j: 0,
+              e: 10,
+              a: 102635157,
+              d: 9,
+              b: 37,
+              c: 0,
+              sh: "live-stack",
+            },
+            targetLocation: 0,
+            target: "1-54605101-existing-37-15",
+            location: 0,
+          },
+        },
+      },
+    },
+  ]);
+
+  assert.equal(events[0].value.label, "Flawless Amethyst");
+  assert.equal(events[0].value.localizationId, "stack_flawless_amethyst");
+});
+
 test("known item rarity map classifies satanic drops", () => {
   const events = messageToEvents([
     {

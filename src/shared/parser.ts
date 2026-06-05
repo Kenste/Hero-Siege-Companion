@@ -575,6 +575,13 @@ function inferItemRarityName(
   const identity = `${translation?.localizationId ?? ""} ${translation?.name ?? ""}`.toLowerCase();
   const knownRarity = trustNamedIdentity ? lookupKnownItemRarity(type, translation?.name) : null;
   if (
+    knownRarity &&
+    !isServerAnnouncedRarity(knownRarity) &&
+    (isServerAnnouncedRarity(mappedRarity) || isServerAnnouncedRarity(explicitRarity))
+  ) {
+    return knownRarity;
+  }
+  if (
     !trustServerAnnouncedRarity &&
     (isServerAnnouncedRarity(mappedRarity) || isServerAnnouncedRarity(explicitRarity) || isServerAnnouncedRarity(knownRarity))
   ) {
@@ -605,10 +612,13 @@ function trustTranslationForRarity(
 ): boolean {
   if (!translation) return true;
   if (options.trustServerAnnouncedRarity) return true;
-  return (
-    isTrustedInventoryItemTranslation(translation) ||
-    (!isServerAnnouncedRarity(mappedRarity) && !isServerAnnouncedRarity(lookupKnownItemRarity(translation.type, translation.name)))
-  );
+  if (isTrustedInventoryItemTranslation(translation)) return true;
+
+  const knownRarity = lookupKnownItemRarity(translation.type, translation.name);
+  if (isServerAnnouncedRarity(knownRarity)) return false;
+  if (knownRarity && !isServerAnnouncedRarity(knownRarity)) return true;
+  if (isStackItemType(translation.type)) return true;
+  return !isServerAnnouncedRarity(mappedRarity);
 }
 
 function trustExplicitNameForRarity(
@@ -622,6 +632,10 @@ function trustExplicitNameForRarity(
 
 function isServerAnnouncedRarity(rarity: string | null | undefined): boolean {
   return rarity === "Heroic" || rarity === "Angelic";
+}
+
+function isStackItemType(type: number): boolean {
+  return [12, 13, 14, 15].includes(type);
 }
 
 function extractServerFoundItemName(msg: MessageObject): string | null {
